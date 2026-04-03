@@ -408,14 +408,23 @@ export default function AwardAssessmentUiMockup() {
 
               {selectedNominee && (
                 <>
-                  <div className="rounded-3xl border border-slate-700/80 bg-slate-900/45 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                      className="rounded-xl border border-slate-600 bg-slate-900/45 px-3 py-2 text-xs md:text-sm font-semibold text-slate-200 transition-all hover:border-amber-400 hover:text-amber-200"
+                    >
+                      Back to Top
+                    </button>
+                  </div>
+
+                  <div className="rounded-3xl border border-slate-700/80 bg-slate-900/45 p-4 md:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
                     <div className="flex items-center gap-4">
                       <div className="rounded-full border border-amber-500/70 p-4 text-amber-400">
                         <UserRound className="h-7 w-7" />
                       </div>
                       <div>
-                        <div className="text-3xl font-bold">{selectedNominee.name}</div>
-                        <div className="text-slate-400 text-lg">{selectedNominee.subtitle}</div>
+                        <div className="text-2xl md:text-3xl font-bold">{selectedNominee.name}</div>
+                        <div className="text-slate-400 text-base md:text-lg">{selectedNominee.subtitle}</div>
                       </div>
                     </div>
                   </div>
@@ -449,22 +458,22 @@ export default function AwardAssessmentUiMockup() {
                               {idx + 1}
                             </div>
                             <div className="space-y-6 flex-1">
-                              <p className="text-2xl leading-relaxed font-semibold text-slate-100">{question}</p>
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                              <p className="text-lg md:text-2xl leading-relaxed font-semibold text-slate-100">{question}</p>
+                              <div className="grid grid-cols-4 gap-2 md:gap-3">
                                 {[1, 2, 3, 4].map((value) => {
                                   const selected = currentScore === value;
                                   return (
                                     <button
                                       key={value}
                                       onClick={() => handleScore(idx, value)}
-                                      className={`rounded-2xl border px-4 py-5 transition-all ${
+                                      className={`rounded-xl md:rounded-2xl border px-2 py-3 md:px-4 md:py-5 transition-all ${
                                         selected
                                           ? 'border-amber-400 bg-amber-400/12 text-white shadow-[0_0_0_1px_rgba(251,191,36,0.35)]'
                                           : 'border-slate-600 bg-slate-900/35 text-slate-200 hover:border-slate-400'
                                       }`}
                                     >
-                                      <div className="text-3xl font-bold">{value}</div>
-                                      <div className="mt-2 text-sm text-slate-400">{scoreLabels[value]}</div>
+                                      <div className="text-xl md:text-3xl font-bold">{value}</div>
+                                      <div className="mt-1 md:mt-2 text-[11px] md:text-sm text-slate-400">{scoreLabels[value]}</div>
                                     </button>
                                   );
                                 })}
