@@ -273,7 +273,7 @@ export default function AwardAssessmentUiMockup() {
         body: JSON.stringify(payload)
       });
 
-      setSubmitMessage(`Submitted ${completedAssessments.length} completed result(s) to Google Sheets.`);
+      setSubmitMessage(`Submitted ${completedAssessments.length} completed result(s).`);
     } catch (error) {
       setSubmitMessage('Submission failed. Please try again.');
     } finally {
@@ -322,7 +322,7 @@ export default function AwardAssessmentUiMockup() {
               disabled={isSubmitting}
               className="rounded-xl border border-amber-400/70 bg-amber-400/10 px-4 py-2 text-sm font-semibold text-amber-100 transition-all hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Results to Google Sheets'}
+              {isSubmitting ? 'Submitting...' : 'Submit Results'}
             </button>
           </div>
           {submitMessage ? <div className="mt-2 text-sm text-slate-300">{submitMessage}</div> : null}
