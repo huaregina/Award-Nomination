@@ -285,7 +285,9 @@ export default function AwardAssessmentUiMockup() {
     if (!shouldScrollToQuestions || !selectedNominee) return;
 
     const frameId = requestAnimationFrame(() => {
-      firstQuestionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const targetTop =
+        (firstQuestionRef.current?.getBoundingClientRect().top ?? 0) + window.scrollY - 8;
+      window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
       setShouldScrollToQuestions(false);
     });
 
