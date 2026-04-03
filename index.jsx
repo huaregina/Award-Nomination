@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { Trophy, Award, Handshake, Home, Star, Globe, ChevronLeft, UserRound, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -128,6 +128,8 @@ export default function AwardAssessmentUiMockup() {
   const [categoryConfig, setCategoryConfig] = useState(FALLBACK_CATEGORY_CONFIG);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
+  const [shouldScrollToQuestions, setShouldScrollToQuestions] = useState(false);
+  const firstQuestionRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -189,6 +191,11 @@ export default function AwardAssessmentUiMockup() {
     setSelectedCategoryId(categoryId);
     const category = categoryConfig.find((c) => c.id === categoryId);
     setSelectedNomineeId(category?.nominees?.[0]?.id ?? null);
+  };
+
+  const handleSelectNominee = (nomineeId) => {
+    setSelectedNomineeId(nomineeId);
+    setShouldScrollToQuestions(true);
   };
 
   const handleScore = (questionIndex, score) => {
@@ -273,6 +280,17 @@ export default function AwardAssessmentUiMockup() {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (!shouldScrollToQuestions || !selectedNominee) return;
+
+    const frameId = requestAnimationFrame(() => {
+      firstQuestionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setShouldScrollToQuestions(false);
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [selectedNominee, shouldScrollToQuestions]);
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#0d2047,_#06122b_45%,_#030b1d_80%)] text-white p-6 md:p-10">
@@ -387,7 +405,7 @@ export default function AwardAssessmentUiMockup() {
                     return (
                       <button
                         key={nominee.id}
-                        onClick={() => setSelectedNomineeId(nominee.id)}
+                        onClick={() => handleSelectNominee(nominee.id)}
                         className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all ${
                           done
                             ? 'border-emerald-500/70 bg-emerald-900/30 text-emerald-200'
@@ -408,15 +426,6 @@ export default function AwardAssessmentUiMockup() {
 
               {selectedNominee && (
                 <>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                      className="rounded-xl border border-slate-600 bg-slate-900/45 px-3 py-2 text-xs md:text-sm font-semibold text-slate-200 transition-all hover:border-amber-400 hover:text-amber-200"
-                    >
-                      Back to Top
-                    </button>
-                  </div>
-
                   <div className="rounded-3xl border border-slate-700/80 bg-slate-900/45 p-4 md:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
                     <div className="flex items-center gap-4">
                       <div className="rounded-full border border-amber-500/70 p-4 text-amber-400">
@@ -451,6 +460,7 @@ export default function AwardAssessmentUiMockup() {
                       return (
                         <div
                           key={idx}
+                          ref={idx === 0 ? firstQuestionRef : null}
                           className="rounded-3xl border border-slate-700/70 bg-slate-900/45 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
                         >
                           <div className="flex gap-4 items-start">
@@ -483,6 +493,15 @@ export default function AwardAssessmentUiMockup() {
                         </div>
                       );
                     })}
+
+                    <div className="flex justify-end pt-2">
+                      <button
+                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        className="rounded-xl border border-slate-600 bg-slate-900/45 px-3 py-2 text-xs md:text-sm font-semibold text-slate-200 transition-all hover:border-amber-400 hover:text-amber-200"
+                      >
+                        Back to Top
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
