@@ -132,7 +132,7 @@ export default function AwardAssessmentUiMockup() {
   useEffect(() => {
     let isMounted = true;
 
-    fetch('/nomination.csv')
+    fetch(`${import.meta.env.BASE_URL}nomination.csv`)
       .then((res) => {
         if (!res.ok) throw new Error('nomination.csv not found');
         return res.text();
