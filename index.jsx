@@ -129,7 +129,7 @@ export default function AwardAssessmentUiMockup() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
   const [shouldScrollToQuestions, setShouldScrollToQuestions] = useState(false);
-  const firstQuestionRef = useRef(null);
+  const nomineeCardRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -284,11 +284,26 @@ export default function AwardAssessmentUiMockup() {
   useEffect(() => {
     if (!shouldScrollToQuestions || !selectedNominee) return;
 
-    const frameId = requestAnimationFrame(() => {
-      const targetTop =
-        (firstQuestionRef.current?.getBoundingClientRect().top ?? 0) + window.scrollY - 8;
+    const scrollToNomineeCard = () => {
+      const target = nomineeCardRef.current;
+      if (!target) return false;
+
+      const targetTop = target.getBoundingClientRect().top + window.scrollY - 12;
       window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
-      setShouldScrollToQuestions(false);
+      return true;
+    };
+
+    const frameId = requestAnimationFrame(() => {
+      if (scrollToNomineeCard()) {
+        setShouldScrollToQuestions(false);
+        return;
+      }
+
+      setTimeout(() => {
+        if (scrollToNomineeCard()) {
+          setShouldScrollToQuestions(false);
+        }
+      }, 80);
     });
 
     return () => cancelAnimationFrame(frameId);
@@ -428,7 +443,10 @@ export default function AwardAssessmentUiMockup() {
 
               {selectedNominee && (
                 <>
-                  <div className="rounded-3xl border border-slate-700/80 bg-slate-900/45 p-4 md:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
+                  <div
+                    ref={nomineeCardRef}
+                    className="rounded-3xl border border-slate-700/80 bg-slate-900/45 p-4 md:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.22)]"
+                  >
                     <div className="flex items-center gap-4">
                       <div className="rounded-full border border-amber-500/70 p-4 text-amber-400">
                         <UserRound className="h-7 w-7" />
@@ -462,7 +480,6 @@ export default function AwardAssessmentUiMockup() {
                       return (
                         <div
                           key={idx}
-                          ref={idx === 0 ? firstQuestionRef : null}
                           className="rounded-3xl border border-slate-700/70 bg-slate-900/45 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
                         >
                           <div className="flex gap-4 items-start">
