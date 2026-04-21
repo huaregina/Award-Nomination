@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
-import { Trophy, Award, Handshake, Home, Star, Globe, ChevronLeft, UserRound, CheckCircle2 } from 'lucide-react';
+import { Trophy, Award, Handshake, Home, Star, Globe, ChevronLeft, ChevronRight, UserRound, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import nominationDataUrl from './nomination_with_reason.csv?url';
 
 const APPS_SCRIPT_URL =
   'https://script.google.com/macros/s/AKfycbw10jtWvXdUXg69MxcmwQl3kE1CO_gzIfJu2ePllU0s0of2-gQJ4SlJAcy-s5fICQZk0g/exec';
@@ -80,23 +81,90 @@ function slugify(value) {
     .replace(/^-+|-+$/g, '');
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function sanitizeNominationText(text, realName, hiddenName) {
+  let sanitized = String(text || '').trim();
+  const normalizedRealName = String(realName || '').trim();
+  const normalizedHiddenName = String(hiddenName || '').trim();
+
+  if (!sanitized) return '';
+
+  sanitized = sanitized.replace(/\[NOMINEE\]/gi, normalizedHiddenName || 'Nominee');
+
+  if (!normalizedRealName || !normalizedHiddenName) {
+    return sanitized;
+  }
+
+  const fullNamePattern = new RegExp(escapeRegExp(normalizedRealName), 'gi');
+  sanitized = sanitized.replace(fullNamePattern, normalizedHiddenName);
+
+  normalizedRealName
+    .split(/\s+/)
+    .filter((part) => part.length >= 4)
+    .forEach((part) => {
+      const partPattern = new RegExp(`\\b${escapeRegExp(part)}\\b`, 'gi');
+      sanitized = sanitized.replace(partPattern, normalizedHiddenName);
+    });
+
+  return sanitized;
+}
+
+function splitNominationReasons(text, nominationCount, realName, hiddenName) {
+  const normalizedText = String(text || '').replace(/\r\n/g, '\n').trim();
+  if (!normalizedText) return [];
+
+  const numberedParts = normalizedText
+    .split(/(?:^|\n)\s*(?=\d+\.\s)/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => part.replace(/^\d+\.\s*/, '').trim())
+    .filter(Boolean);
+
+  const reasonPages =
+    numberedParts.length > 0
+      ? numberedParts
+      : nominationCount > 1
+      ? normalizedText
+          .split(/\n\s*\n+/)
+          .map((part) => part.trim())
+          .filter(Boolean)
+      : [normalizedText];
+
+  return reasonPages
+    .map((reason) => sanitizeNominationText(reason, realName, hiddenName))
+    .filter(Boolean);
+}
+
 function buildCategoryConfigFromCsv(rows) {
   const grouped = rows.reduce((acc, row) => {
     const category = String(row.Category || '').trim();
     const name = String(row.Name || '').trim();
+    const hiddenName = String(row['Hide Name'] || '').trim();
     const department = String(row.Department || '').trim();
+    const nominationReason = String(row['Nomination Reason'] || '');
+    const nominationCount = Number(row['Nomination Count']) || 0;
 
     if (!category || !name) return acc;
 
     if (!acc[category]) acc[category] = [];
 
-    const nomineeId = slugify(`${category}-${name}`);
-    if (!acc[category].some((item) => item.id === nomineeId)) {
+    const nomineeId = slugify(`${category}-${hiddenName || name}`);
+    const existingNominee = acc[category].find((item) => item.id === nomineeId);
+    const reasonPages = splitNominationReasons(nominationReason, nominationCount, name, hiddenName || name);
+
+    if (!existingNominee) {
       acc[category].push({
         id: nomineeId,
-        name,
-        subtitle: department || 'Department not listed'
+        name: hiddenName || name,
+        realName: name,
+        subtitle: department || 'Department not listed',
+        reasons: reasonPages
       });
+    } else if (reasonPages.length > 0) {
+      existingNominee.reasons = [...existingNominee.reasons, ...reasonPages];
     }
 
     return acc;
@@ -129,14 +197,15 @@ export default function AwardAssessmentUiMockup() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
   const [shouldScrollToQuestions, setShouldScrollToQuestions] = useState(false);
+  const [selectedNominationPage, setSelectedNominationPage] = useState(0);
   const nomineeCardRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    fetch(`${import.meta.env.BASE_URL}nomination.csv`)
+    fetch(nominationDataUrl)
       .then((res) => {
-        if (!res.ok) throw new Error('nomination.csv not found');
+        if (!res.ok) throw new Error('nomination_with_reason.csv not found');
         return res.text();
       })
       .then((csvText) => {
@@ -191,10 +260,12 @@ export default function AwardAssessmentUiMockup() {
     setSelectedCategoryId(categoryId);
     const category = categoryConfig.find((c) => c.id === categoryId);
     setSelectedNomineeId(category?.nominees?.[0]?.id ?? null);
+    setSelectedNominationPage(0);
   };
 
   const handleSelectNominee = (nomineeId) => {
     setSelectedNomineeId(nomineeId);
+    setSelectedNominationPage(0);
     setShouldScrollToQuestions(true);
   };
 
@@ -213,6 +284,8 @@ export default function AwardAssessmentUiMockup() {
   };
 
   const currentScores = responses[selectedCategoryId]?.[selectedNomineeId] || {};
+  const nominationPages = selectedNominee?.reasons || [];
+  const currentNominationText = nominationPages[selectedNominationPage] || '';
 
   const nomineeCountCompleted = selectedCategory
     ? categoryProgress[selectedCategory.id]?.ratedCount || 0
@@ -396,6 +469,7 @@ export default function AwardAssessmentUiMockup() {
                     onClick={() => {
                       setSelectedCategoryId(null);
                       setSelectedNomineeId(null);
+                      setSelectedNominationPage(0);
                     }}
                     className="mt-1 rounded-full p-2 text-slate-300 hover:bg-slate-800 hover:text-white"
                   >
@@ -455,6 +529,46 @@ export default function AwardAssessmentUiMockup() {
                         <div className="text-2xl md:text-3xl font-bold">{selectedNominee.name}</div>
                         <div className="text-slate-400 text-base md:text-lg">{selectedNominee.subtitle}</div>
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-3xl border border-slate-700/80 bg-slate-900/45 p-5 md:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <div className="text-xl md:text-2xl font-bold text-amber-300">Read Nomination</div>
+                        <div className="text-sm text-slate-400">
+                          {nominationPages.length > 0
+                            ? `Page ${selectedNominationPage + 1} of ${nominationPages.length}`
+                            : 'No nomination reason available for this nominee.'}
+                        </div>
+                      </div>
+
+                      {nominationPages.length > 1 ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setSelectedNominationPage((page) => Math.max(0, page - 1))}
+                            disabled={selectedNominationPage === 0}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm font-semibold text-slate-200 transition-all hover:border-amber-400 hover:text-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                          </button>
+                          <button
+                            onClick={() =>
+                              setSelectedNominationPage((page) => Math.min(nominationPages.length - 1, page + 1))
+                            }
+                            disabled={selectedNominationPage === nominationPages.length - 1}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm font-semibold text-slate-200 transition-all hover:border-amber-400 hover:text-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            Next
+                            <ChevronRight className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-5 rounded-2xl border border-slate-700/70 bg-slate-950/45 p-5 text-base leading-8 text-slate-100 whitespace-pre-wrap">
+                      {currentNominationText || 'No nomination reason available for this nominee.'}
                     </div>
                   </div>
 
