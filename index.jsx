@@ -305,7 +305,7 @@ export default function AwardAssessmentUiMockup() {
             categoryId: category.id,
             categoryName: category.name,
             nomineeId: nominee.id,
-            nomineeName: nominee.name,
+            nomineeName: nominee.realName || nominee.name,
             department: nominee.subtitle,
             q1: orderedScores[0],
             q2: orderedScores[1],
