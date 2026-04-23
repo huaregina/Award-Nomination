@@ -209,6 +209,7 @@ export default function AwardAssessmentUiMockup() {
   const [submitMessage, setSubmitMessage] = useState('');
   const [shouldScrollToQuestions, setShouldScrollToQuestions] = useState(false);
   const [selectedNominationPage, setSelectedNominationPage] = useState(0);
+  const [showSaveNotice, setShowSaveNotice] = useState(true);
   const nomineeCardRef = useRef(null);
 
   useEffect(() => {
@@ -403,6 +404,54 @@ export default function AwardAssessmentUiMockup() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#0d2047,_#06122b_45%,_#030b1d_80%)] text-white p-6 md:p-10">
+      <AnimatePresence>
+        {showSaveNotice && !selectedCategory ? (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="save-notice-title"
+              className="w-full max-w-lg rounded-3xl border border-amber-400/50 bg-slate-950 p-6 text-slate-100 shadow-[0_24px_70px_rgba(0,0,0,0.5)]"
+              initial={{ opacity: 0, scale: 0.94, y: 18 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 10 }}
+            >
+              <div className="space-y-4">
+                <div className="inline-flex rounded-full border border-amber-400/50 bg-amber-400/10 px-3 py-1 text-sm font-semibold text-amber-200">
+                  Rating progress update
+                </div>
+                <div className="space-y-3">
+                  <h2 id="save-notice-title" className="text-2xl font-bold text-white">
+                    Your ratings are now saved locally
+                  </h2>
+                  <p className="leading-7 text-slate-300">
+                    We made changes so your ratings stay on this device. You can refresh the page, close the
+                    window, walk away, and reopen it later to pick up where you left off.
+                  </p>
+                  <p className="leading-7 text-slate-300">
+                    This works as long as you use the same device and same browser, and you do not clear your
+                    browser data. When you are finished, click <span className="font-semibold text-amber-200">Submit Results</span>.
+                  </p>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() => setShowSaveNotice(false)}
+                    className="rounded-xl border border-amber-400/70 bg-amber-400/10 px-5 py-2 text-sm font-semibold text-amber-100 transition-all hover:bg-amber-400/20"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
       <div className="mx-auto max-w-6xl">
         <div className="mb-5 rounded-2xl border border-slate-700/70 bg-slate-900/45 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
