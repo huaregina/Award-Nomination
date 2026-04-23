@@ -185,20 +185,39 @@ const scoreLabels = {
   4: 'Excellent'
 };
 
+const RESPONSES_STORAGE_KEY = 'award-assessment-responses-v1';
+
 function isNomineeComplete(scores) {
   return QUESTIONS.every((_, idx) => typeof scores?.[idx] === 'number');
+}
+
+function loadSavedResponses() {
+  try {
+    const savedResponses = window.localStorage.getItem(RESPONSES_STORAGE_KEY);
+    return savedResponses ? JSON.parse(savedResponses) : {};
+  } catch (error) {
+    return {};
+  }
 }
 
 export default function AwardAssessmentUiMockup() {
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedNomineeId, setSelectedNomineeId] = useState(null);
-  const [responses, setResponses] = useState({});
+  const [responses, setResponses] = useState(loadSavedResponses);
   const [categoryConfig, setCategoryConfig] = useState(FALLBACK_CATEGORY_CONFIG);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
   const [shouldScrollToQuestions, setShouldScrollToQuestions] = useState(false);
   const [selectedNominationPage, setSelectedNominationPage] = useState(0);
   const nomineeCardRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(RESPONSES_STORAGE_KEY, JSON.stringify(responses));
+    } catch (error) {
+      // Ignore storage failures so scoring still works in private or restricted browsers.
+    }
+  }, [responses]);
 
   useEffect(() => {
     let isMounted = true;
