@@ -210,6 +210,7 @@ export default function AwardAssessmentUiMockup() {
   const [shouldScrollToQuestions, setShouldScrollToQuestions] = useState(false);
   const [selectedNominationPage, setSelectedNominationPage] = useState(0);
   const [showSaveNotice, setShowSaveNotice] = useState(true);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const nomineeCardRef = useRef(null);
 
   useEffect(() => {
@@ -340,12 +341,16 @@ export default function AwardAssessmentUiMockup() {
     );
   }, [categoryConfig, responses]);
 
-  const handleSubmitResults = async () => {
+  const handleSubmitClick = () => {
     if (completedAssessments.length === 0) {
       setSubmitMessage('No completed nominee ratings to submit yet.');
       return;
     }
 
+    setShowSubmitConfirm(true);
+  };
+
+  const handleSubmitResults = async () => {
     setIsSubmitting(true);
     setSubmitMessage('');
 
@@ -366,7 +371,13 @@ export default function AwardAssessmentUiMockup() {
         body: JSON.stringify(payload)
       });
 
-      setSubmitMessage(`Submitted ${completedAssessments.length} completed result(s).`);
+      const submittedCount = completedAssessments.length;
+      setResponses({});
+      setSelectedCategoryId(null);
+      setSelectedNomineeId(null);
+      setSelectedNominationPage(0);
+      setShowSubmitConfirm(false);
+      setSubmitMessage(`Submitted ${submittedCount} completed result(s). Your saved local responses were cleared.`);
     } catch (error) {
       setSubmitMessage('Submission failed. Please try again.');
     } finally {
@@ -452,6 +463,60 @@ export default function AwardAssessmentUiMockup() {
         ) : null}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {showSubmitConfirm ? (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="submit-confirm-title"
+              className="w-full max-w-xl rounded-3xl border border-orange-400/60 bg-slate-950 p-6 text-slate-100 shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+              initial={{ opacity: 0, scale: 0.94, y: 18 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 10 }}
+            >
+              <div className="space-y-5">
+                <div className="inline-flex rounded-full border border-orange-400/60 bg-orange-500/10 px-3 py-1 text-sm font-semibold text-orange-200">
+                  Please confirm before submitting
+                </div>
+                <div className="space-y-3">
+                  <h2 id="submit-confirm-title" className="text-2xl font-bold text-white">
+                    Are you sure you want to submit?
+                  </h2>
+                  <p className="text-lg leading-8 text-slate-300">
+                    All nominees marked in green will be submitted.
+                  </p>
+                  <p className="leading-7 text-orange-200">
+                    After submission, your locally saved responses will be cleared from this browser.
+                  </p>
+                </div>
+                <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+                  <button
+                    onClick={() => setShowSubmitConfirm(false)}
+                    disabled={isSubmitting}
+                    className="rounded-xl border border-amber-400/70 bg-amber-400/10 px-5 py-2 text-sm font-semibold text-amber-100 transition-all hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Continue Rating
+                  </button>
+                  <button
+                    onClick={handleSubmitResults}
+                    disabled={isSubmitting}
+                    className="rounded-xl border border-orange-500 bg-orange-600/85 px-5 py-2 text-sm font-bold text-white shadow-[0_0_0_1px_rgba(251,146,60,0.25),0_10px_30px_rgba(194,65,12,0.3)] transition-all hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit and Clear Responses'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
       <div className="mx-auto max-w-6xl">
         <div className="mb-5 rounded-2xl border border-slate-700/70 bg-slate-900/45 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -459,7 +524,7 @@ export default function AwardAssessmentUiMockup() {
               Completed results ready to submit: <span className="font-semibold text-amber-300">{completedAssessments.length}</span>
             </div>
             <button
-              onClick={handleSubmitResults}
+              onClick={handleSubmitClick}
               disabled={isSubmitting}
               className="rounded-xl border border-amber-400/70 bg-amber-400/10 px-4 py-2 text-sm font-semibold text-amber-100 transition-all hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
