@@ -21,8 +21,8 @@ const FALLBACK_CATEGORY_CONFIG = [
     name: 'Excellence in Patient Care Support (Non-Nursing)',
     icon: Handshake,
     nominees: [
-      { id: 'haminah', name: 'Haminah Qaiyim', subtitle: 'Rehabilitation' },
-      { id: 'rafael', name: 'Rafael Moralde', subtitle: 'Patient Support Services' }
+      { id: 'nominee-1', name: 'Nominee 1', subtitle: 'Sample Department A' },
+      { id: 'nominee-2', name: 'Nominee 2', subtitle: 'Sample Department B' }
     ]
   },
   {
@@ -30,8 +30,8 @@ const FALLBACK_CATEGORY_CONFIG = [
     name: 'APRN of the Year',
     icon: Award,
     nominees: [
-      { id: 'jasmine', name: 'Jasmine Lewis', subtitle: 'Advanced Practice Nursing' },
-      { id: 'olivia', name: 'Olivia Carter', subtitle: 'Ambulatory Care' }
+      { id: 'nominee-3', name: 'Nominee 3', subtitle: 'Sample Department C' },
+      { id: 'nominee-4', name: 'Nominee 4', subtitle: 'Sample Department D' }
     ]
   },
   {
@@ -39,8 +39,8 @@ const FALLBACK_CATEGORY_CONFIG = [
     name: 'Excellence in Community Care',
     icon: Home,
     nominees: [
-      { id: 'nadia', name: 'Nadia Scott', subtitle: 'Community Outreach' },
-      { id: 'aaron', name: 'Aaron Rivera', subtitle: 'Population Health' }
+      { id: 'nominee-5', name: 'Nominee 5', subtitle: 'Sample Department E' },
+      { id: 'nominee-6', name: 'Nominee 6', subtitle: 'Sample Department F' }
     ]
   },
   {
@@ -48,8 +48,8 @@ const FALLBACK_CATEGORY_CONFIG = [
     name: 'Partners of Nursing (Non-Nursing)',
     icon: Handshake,
     nominees: [
-      { id: 'marcus', name: 'Marcus Hall', subtitle: 'Operations' },
-      { id: 'lena', name: 'Lena Patel', subtitle: 'Care Coordination' }
+      { id: 'nominee-7', name: 'Nominee 7', subtitle: 'Sample Department G' },
+      { id: 'nominee-8', name: 'Nominee 8', subtitle: 'Sample Department H' }
     ]
   },
   {
@@ -57,8 +57,8 @@ const FALLBACK_CATEGORY_CONFIG = [
     name: 'APRN Leader',
     icon: Star,
     nominees: [
-      { id: 'mia', name: 'Mia Thompson', subtitle: 'Clinical Leadership' },
-      { id: 'sophia', name: 'Sophia Nguyen', subtitle: 'Nursing Administration' }
+      { id: 'nominee-9', name: 'Nominee 9', subtitle: 'Sample Department I' },
+      { id: 'nominee-10', name: 'Nominee 10', subtitle: 'Sample Department J' }
     ]
   },
   {
@@ -66,8 +66,8 @@ const FALLBACK_CATEGORY_CONFIG = [
     name: 'Excellence in Public Health Care',
     icon: Globe,
     nominees: [
-      { id: 'jordan', name: 'Jordan Brooks', subtitle: 'Public Health' },
-      { id: 'nina', name: 'Nina Lopez', subtitle: 'Preventive Care' }
+      { id: 'nominee-11', name: 'Nominee 11', subtitle: 'Sample Department K' },
+      { id: 'nominee-12', name: 'Nominee 12', subtitle: 'Sample Department L' }
     ]
   }
 ];
@@ -434,19 +434,18 @@ export default function AwardAssessmentUiMockup() {
             >
               <div className="space-y-4">
                 <div className="inline-flex rounded-full border border-amber-400/50 bg-amber-400/10 px-3 py-1 text-sm font-semibold text-amber-200">
-                  Rating progress update
+                  Award nomination update
                 </div>
                 <div className="space-y-3">
                   <h2 id="save-notice-title" className="text-2xl font-bold text-white">
-                    Your ratings are now saved locally
+                    The 2026 award nomination is ended
                   </h2>
                   <p className="leading-7 text-slate-300">
-                    We made changes so your ratings stay on this device. You can refresh the page, close the
-                    window, walk away, and reopen it later to pick up where you left off.
+                    This data has been changed to sample data for future reference.
                   </p>
                   <p className="leading-7 text-slate-300">
-                    This works as long as you use the same device and same browser, and you do not clear your
-                    browser data. When you are finished, click <span className="font-semibold text-amber-200">Submit Results</span>.
+                    The website remains available so past nomination review workflows can be referenced without
+                    exposing the original 2026 nomination data.
                   </p>
                 </div>
                 <div className="flex justify-end pt-2">
